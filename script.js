@@ -4,7 +4,7 @@
     // board.filter((obj) => obj.row === 1)
 
 
-// function createGameboard() {
+// const board = (function() {
 //     const board = [];
 //     const rows = 3;
 //     const cols = 3;
@@ -15,23 +15,22 @@
 //            }
 //         }
 //         return board
-// }
-
-// const board = createGameboard();
-
+// })();
 
 const board = (function() {
     const board = [];
     const rows = 3;
     const cols = 3;
     
-        for (let i = 0; i < (rows);  i++) {
-            for (let j = 0; j < (cols);  j++) {
-            board.push({'row': i, 'col': j, 'val': null});
+        for (let i = 0; i < rows;  i++) {
+            board[i] = [];
+            for (let j = 0; j < cols;  j++) {
+                board[i][j] = {row: i, col: j, val: null};
            }
         }
         return board
 })();
+
 
 //create a player function that creates a player
 
@@ -55,8 +54,86 @@ function createPlayer(name, XorO) {
 
 const player1 = createPlayer('Dave', 'X');
 const player2 = createPlayer('Bob', 'O');
+board[0][0].val = '1'
+board[0][1].val = '2'
+board[0][2].val = '3'
+board[1][0].val = '4'
+board[1][1].val = '5'
+board[1][2].val = '3'
+board[2][0].val = '8'
+board[2][1].val = '8'
+board[2][2].val = '3'
+
+const displayBoard = board.map(row => row.map(cell => cell.val));
 
 
+
+function checkRow(board) {
+    const rows = board.length
+
+    for (let i = 0; i < rows; i++) {
+        const row = board[i];
+        const firstValue = row[0].val;
+        console.log(`The ${i} row is ${row}`);
+        console.log(row);
+        console.log(`The firstValue is ${firstValue}`);
+
+        if (firstValue !== null &&
+            row.every(cell => cell.val === firstValue)
+        ) {
+            return firstValue;
+        }
+    }
+    return null;
+
+}
+
+
+function checkColumn(board) {
+    for (let i = 0; i < 3; i++) {
+        console.log(`i is ${i}`);
+        const firstValue = board[0][i].val;
+
+        if (firstValue === null) {
+            continue
+        }
+
+        let winningColumn = true;
+
+        for (let j = 0; j < 3; j++) {
+            const cell = board[j][i];
+            console.log(`Row ${j}, Column ${i}: ${cell.val}`);
+
+            if (cell.val !== firstValue)  {
+                winningColumn = false;
+                break;
+            }
+
+        }
+
+        if (winningColumn) {
+            return firstValue;
+        }
+
+    }
+    return null
+}
+
+// function checkCol(board) {
+//     const cols = board.length;
+    
+//     for(let i = 0; i < cols; i++) {
+//         const col = board
+//     }
+// }
+
+
+
+// function checkWinner() {
+
+
+
+// }
 
 
 //game round number variable

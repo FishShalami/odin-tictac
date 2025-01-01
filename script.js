@@ -6,11 +6,16 @@ const board = (function() {
     const board = [];
     const rows = 3;
     const cols = 3;
+    let divBoard = document.querySelector(".board")
     
         for (let i = 0; i < rows;  i++) {
             board[i] = [];
             for (let j = 0; j < cols;  j++) {
                 board[i][j] = {row: i, col: j, val: null};
+                const boardCell = document.createElement('div');
+                boardCell.id = `${i}_${j}`;
+                boardCell.className = "boardCell";
+                divBoard.appendChild(boardCell);
            }
         }
         return board
@@ -20,29 +25,38 @@ function displayBoard() {
     console.table(board.map(row => row.map(cell => cell.val)));
 }
 
-
+function createPlayerNames() {
+    let player1Name = prompt('Enter your name Player 1' || 'Player 1');
+    let player2Name = prompt('Enter your name Player 2' || 'Player 2');
+    return {player1Name, player2Name}
+}
 
 function createPlayer(name, XorO) {
     return {
         name: name,
         XorO: XorO,
         greet: function() {
-            //player one is 'X'. Player two is 'O'
-            if (XorO === 'X') {
-                console.log(`Welcome ${this.name}! You chose ${this.XorO} and are Player 1`)
-            } else if (XorO === 'O') {
-                console.log(`Welcome ${this.name}! You chose ${this.XorO} and are Player 2`)
-            } else {
-                console.log(`Try again, you must pick 'X' or 'O'`);
-            }
-            
+            alert(`Welcome ${this.name}! You are ${this.XorO} and are Player 1`)
+            }            
         }
-    }; 
-} 
+}; 
+
+function setUpPlayers() {
+    const {player1Name, player2Name} = createPlayerNames();
+    const divName1 = document.querySelector("#p1")
+    const divName2 = document.querySelector("#p2")
+
+    const player1 = createPlayer(player1Name, 'X');
+    const player2 = createPlayer(player2Name, 'O');
+
+    divName1.textContent = player1Name + " ❌";
+    divName2.textContent = player2Name + " ⭕";
+
+    return {player1, player2}
+}
 
 
-
-
+// winning functions
 
 function checkRow(board) {
     const rows = board.length
@@ -63,8 +77,6 @@ function checkRow(board) {
     return null;
 
 }
-
-
 function checkColumn(board) {
     for (let i = 0; i < 3; i++) {
         // console.log(`i is ${i}`);
@@ -78,7 +90,7 @@ function checkColumn(board) {
 
         for (let j = 0; j < 3; j++) {
             const cell = board[j][i];
-            console.log(`Row ${j}, Column ${i}: ${cell.val}`);
+            // console.log(`Row ${j}, Column ${i}: ${cell.val}`);
 
             if (cell.val !== firstValue)  {
                 winningColumn = false;
@@ -91,7 +103,6 @@ function checkColumn(board) {
     }
     return null
 }
-
 function checkDiagonal(board) {
     const topLeftValue = board[0][0].val;
     const topRightValue = board[0][2].val;
@@ -109,7 +120,6 @@ function checkDiagonal(board) {
         return null
     }
 }
-// This isn't working, need to add in logic to return the right value
 function win(board) {
     const winningColumn = checkColumn(board);
     const winningDiag = checkDiagonal(board);
@@ -129,49 +139,76 @@ function win(board) {
      }
 }
 
-function playRound(player1, player2){
-    displayBoard()
-    console.log("Player 1's turn");
-    playTurn(player1);
-    console.log("Player 2's turn");
-    playTurn(player2);
-    displayBoard()
-}
+
+// function cellSelect(currentPlayer, callback) {
+//     const gameboard = document.querySelectorAll('.boardCell');
+
+//     gameboard.forEach(cell => {
+//         cell.addEventListener('click', function() {
+//             const [userRow, userCol] = this.id.split('-').map(Number);
+//             console.log([userRow, userCol]);
+            
+//             callback(currentPlayer, userRow, userCol);
+//         });
+//     });
+
+// }
 
 function cellPrompt(currentPlayer) {
     let userRow = prompt(`${currentPlayer.name} enter row number 0, 1, 2:`);
+    if (userRow === null) {
+        return; //break out of the function early
+    }
     let userCol = prompt(`${currentPlayer.name} enter column number 0, 1, 2:`);
+    if (userCol === null) {
+        return; //break out of the function early
+    }
     return [Number(userRow), Number(userCol)];
 }
 
 
+
+
 function playTurn(currentPlayer) {
     let [userRow, userCol] = cellPrompt(currentPlayer);
-    console.log(`${currentPlayer.name} selected cell: ${userRow}, ${userCol}`);
+    console.log(`${currentPlayer} selected cell: ${userRow}, ${userCol}`);
 
-    while (board[userRow][userCol].val !== null) {
-        alert(`${currentPlayer.name}, that cell is already occupied. Try again.`);
+    if (board[userRow][userCol].val !== null) {
         console.log('Cell is already occupied. Try again.');
-        [userRow, userCol] = cellPrompt(currentPlayer);
+        return;
     } 
     board[userRow][userCol].val = currentPlayer.XorO;
-
+    console.log("createMark called with:", currentPlayer, userRow, userCol);
+    createMark(currentPlayer, userRow, userCol);
+    console.log(`Board updated with ${currentPlayer.XorO} at (${userRow}, ${userCol})`);
+    
 }
 
 
-// Need to turn this into a loop or something
 function playGame() {
-    const player1 = createPlayer('Dave', 'X');
-    const player2 = createPlayer('Bob', 'O');
+    const {player1, player2} = setUpPlayers()
+
+    let currentPlayer = player1;
 
     while (win(board) === null) {
-        playRound(player1, player2);
+        playTurn(currentPlayer);
+        displayBoard();
+
+        if (win(board) !== null) {
+            alert(`${currentPlayer.name} wins! Game over`)
+        }
+        currentPlayer = currentPlayer === player1 ? player2: player1;
     }
 
-    if (win(board) === player1.XorO) {
-        alert(`${player1.name} wins!`) 
-    } else {
-        alert(`${player2.name} wins!`)
-    }
 }
 
+function createMark(currentPlayer, userRow, userCol) {
+    // let [userRow, userCol] = cellPrompt(currentPlayer);
+    const cell = `${userRow}_${userCol}`;
+    console.log(`${currentPlayer} selected a cell with id ${cell}`)
+    const divCell = document.querySelector(`[id = "${cell}"]`)
+    const marker = document.createElement("p");
+    marker.innerText = currentPlayer.XorO;
+    divCell.appendChild(marker);
+
+}

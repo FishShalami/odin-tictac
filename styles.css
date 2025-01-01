@@ -1,0 +1,67 @@
+body {
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+h1 {
+    font-size: 3rem;
+
+}
+
+h1::before {
+    content: "❌ "
+}
+
+h1::after {
+    content: " ⭕";
+}
+
+.board {
+    width: 50%;
+    aspect-ratio: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    background-color: black;
+    margin: auto;
+    justify-items: center;
+    border: black solid 10px;
+}
+
+.boardCell {
+    background-color: bisque;
+    /* width: px; */
+    aspect-ratio: 1;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    margin: 1.5rem;
+}
+
+.players {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    justify-items: center;
+    margin-left: 25vw;
+    margin-right: 25vw;
+    font-size: 2rem;
+}
+
+.pName {
+    font-weight: bold;
+}
+
+button {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    /* margin: auto; */
+    background-color: blue;
+    height: 2rem;
+    color: white;
+    border-radius: 1.5rem;
+    padding: 1.2rem;
+    font-size: 1.5rem;
+}

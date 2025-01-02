@@ -21,6 +21,8 @@ const board = (function() {
         return board
 })();
 
+
+
 function displayBoard() {
     console.table(board.map(row => row.map(cell => cell.val)));
 }
@@ -154,53 +156,113 @@ function win(board) {
 
 // }
 
-function cellPrompt(currentPlayer) {
-    let userRow = prompt(`${currentPlayer.name} enter row number 0, 1, 2:`);
-    if (userRow === null) {
-        return; //break out of the function early
-    }
-    let userCol = prompt(`${currentPlayer.name} enter column number 0, 1, 2:`);
-    if (userCol === null) {
-        return; //break out of the function early
-    }
-    return [Number(userRow), Number(userCol)];
-}
+// function cellPrompt(currentPlayer) {
+//     let userRow = prompt(`${currentPlayer.name} enter row number 0, 1, 2:`);
+//     if (userRow === null) {
+//         return; //break out of the function early
+//     }
+//     let userCol = prompt(`${currentPlayer.name} enter column number 0, 1, 2:`);
+//     if (userCol === null) {
+//         return; //break out of the function early
+//     }
+//     return [Number(userRow), Number(userCol)];
+// }
 
 
 
 
-function playTurn(currentPlayer) {
-    let [userRow, userCol] = cellPrompt(currentPlayer);
-    console.log(`${currentPlayer} selected cell: ${userRow}, ${userCol}`);
+// function playTurn(currentPlayer) {
+//     let [userRow, userCol] = cellPrompt(currentPlayer);
+//     console.log(`${currentPlayer} selected cell: ${userRow}, ${userCol}`);
 
-    if (board[userRow][userCol].val !== null) {
-        console.log('Cell is already occupied. Try again.');
-        return;
-    } 
-    board[userRow][userCol].val = currentPlayer.XorO;
-    console.log("createMark called with:", currentPlayer, userRow, userCol);
-    createMark(currentPlayer, userRow, userCol);
-    console.log(`Board updated with ${currentPlayer.XorO} at (${userRow}, ${userCol})`);
+//     if (board[userRow][userCol].val !== null) {
+//         console.log('Cell is already occupied. Try again.');
+//         return;
+//     } 
+//     board[userRow][userCol].val = currentPlayer.XorO;
+//     console.log("createMark called with:", currentPlayer, userRow, userCol);
+//     createMark(currentPlayer, userRow, userCol);
+//     console.log(`Board updated with ${currentPlayer.XorO} at (${userRow}, ${userCol})`);
     
-}
+// }
 
 
 function playGame() {
     const {player1, player2} = setUpPlayers()
-
     let currentPlayer = player1;
 
-    while (win(board) === null) {
-        playTurn(currentPlayer);
-        displayBoard();
+    const gameState = {
+        currentPlayer: currentPlayer,
+        player1: player1,
+        player2: player2,
+        isGameOver: false
+    };
 
-        if (win(board) !== null) {
-            alert(`${currentPlayer.name} wins! Game over`)
-        }
-        currentPlayer = currentPlayer === player1 ? player2: player1;
-    }
+    const gameboard = document.querySelectorAll('.boardCell');
+
+    gameboard.forEach(cell => {
+        cell.addEventListener('click', function(event) {
+            if (!gameState.isGameOver) {
+                handleCellClick(event, gameState);
+            }
+        });
+    });
+
+    const resetButton = document.querySelector('#reset-button');  // You'll need to add this to your HTML
+    resetButton.addEventListener('click', function() {
+        resetBoard(gameState);
+        // Maybe add a message to show the game is reset?
+        console.log('Game reset! ' + gameState.currentPlayer.name + ' goes first');
+    });
 
 }
+
+
+function handleCellClick(event, gameState) {
+    if (gameState.isGameOver) {
+        return;
+    }
+
+    const [row, col] = event.target.id.split('_').map(Number);
+
+    if (board[row][col].val !== null) {
+        return; // Cell is already occupied
+    }
+
+    board[row][col].val = gameState.currentPlayer.XorO;
+    createMark(gameState.currentPlayer, row, col)
+    console.log(`Current player is ${gameState.currentPlayer.name}`);
+
+    if (win(board) !== null) {
+        alert(`${gameState.currentPlayer.name} wins! Game over`);
+        gameState.isGameOver = true;
+        return;
+    }
+
+    gameState.currentPlayer = 
+        gameState.currentPlayer === gameState.player1
+        ? gameState.player2
+        : gameState.player1;
+}
+
+
+function resetBoard(gameState) {
+    const divCellP = document.querySelectorAll(".boardCell p")
+
+    divCellP.forEach(p => p.remove());
+
+    // Reset the board data structure
+    for (let i = 0; i < board.length; i++) {
+        for (let j = 0; j < board[i].length; j++) {
+            board[i][j].val = null;
+        }
+    }
+    
+    // Reset the game state
+    gameState.isGameOver = false;
+    gameState.currentPlayer = gameState.player1;
+}
+
 
 function createMark(currentPlayer, userRow, userCol) {
     // let [userRow, userCol] = cellPrompt(currentPlayer);

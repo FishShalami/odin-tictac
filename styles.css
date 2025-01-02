@@ -58,6 +58,7 @@ h1::after {
 
 .pName {
     font-weight: bold;
+    font-size: 2rem;
 }
 
 button {

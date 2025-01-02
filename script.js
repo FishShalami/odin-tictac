@@ -28,8 +28,16 @@ function displayBoard() {
 }
 
 function createPlayerNames() {
-    let player1Name = prompt('Enter your name Player 1' || 'Player 1');
-    let player2Name = prompt('Enter your name Player 2' || 'Player 2');
+    // let player1Name = prompt('Enter your name Player 1' || 'Player 1');
+    // let player2Name = prompt('Enter your name Player 2' || 'Player 2');
+
+    const player1Input = document.querySelector('#p1')
+    const player2Input = document.querySelector('#p2')
+
+    let player1Name = player1Input.value || 'Player 1'
+    let player2Name = player2Input.vale || 'Player 2'
+
+
     return {player1Name, player2Name}
 }
 
@@ -56,6 +64,8 @@ function setUpPlayers() {
 
     return {player1, player2}
 }
+
+
 
 
 // winning functions
@@ -142,56 +152,28 @@ function win(board) {
 }
 
 
-// function cellSelect(currentPlayer, callback) {
-//     const gameboard = document.querySelectorAll('.boardCell');
-
-//     gameboard.forEach(cell => {
-//         cell.addEventListener('click', function() {
-//             const [userRow, userCol] = this.id.split('-').map(Number);
-//             console.log([userRow, userCol]);
-            
-//             callback(currentPlayer, userRow, userCol);
-//         });
-//     });
-
-// }
-
-// function cellPrompt(currentPlayer) {
-//     let userRow = prompt(`${currentPlayer.name} enter row number 0, 1, 2:`);
-//     if (userRow === null) {
-//         return; //break out of the function early
-//     }
-//     let userCol = prompt(`${currentPlayer.name} enter column number 0, 1, 2:`);
-//     if (userCol === null) {
-//         return; //break out of the function early
-//     }
-//     return [Number(userRow), Number(userCol)];
-// }
-
-
-
-
-// function playTurn(currentPlayer) {
-//     let [userRow, userCol] = cellPrompt(currentPlayer);
-//     console.log(`${currentPlayer} selected cell: ${userRow}, ${userCol}`);
-
-//     if (board[userRow][userCol].val !== null) {
-//         console.log('Cell is already occupied. Try again.');
-//         return;
-//     } 
-//     board[userRow][userCol].val = currentPlayer.XorO;
-//     console.log("createMark called with:", currentPlayer, userRow, userCol);
-//     createMark(currentPlayer, userRow, userCol);
-//     console.log(`Board updated with ${currentPlayer.XorO} at (${userRow}, ${userCol})`);
-    
-// }
-
 
 function playGame() {
+    // Get the input fields
+    const player1Input = document.querySelector('#p1');
+    const player2Input = document.querySelector('#p2');
+
+    // Basic validation
+    if (!player1Input.value || !player2Input.value) {
+        alert('Please enter names for both players!');
+        return;
+}
+
     const {player1, player2} = setUpPlayers()
     let currentPlayer = player1;
 
-    const gameState = {
+    // Disable inputs once game starts
+    player1Input.disabled = true;
+    player2Input.disabled = true;
+
+    
+
+    var gameState = {
         currentPlayer: currentPlayer,
         player1: player1,
         player2: player2,
@@ -199,7 +181,6 @@ function playGame() {
     };
 
     const gameboard = document.querySelectorAll('.boardCell');
-
     gameboard.forEach(cell => {
         cell.addEventListener('click', function(event) {
             if (!gameState.isGameOver) {
@@ -208,13 +189,24 @@ function playGame() {
         });
     });
 
-    const resetButton = document.querySelector('#reset-button');  // You'll need to add this to your HTML
-    resetButton.addEventListener('click', function() {
-        resetBoard(gameState);
-        // Maybe add a message to show the game is reset?
-        console.log('Game reset! ' + gameState.currentPlayer.name + ' goes first');
+
+}
+
+function initializeGame(gameState) {
+    // Set up the start button listener
+    const startButton = document.querySelector('#start-button');
+    startButton.addEventListener('click', function() {
+        // Only start if we haven't already started
+        if (!gameState) {
+            playGame();
+        }
     });
 
+    const resetButton = document.querySelector('#reset-button');
+    resetButton.addEventListener('click', function() {
+        resetBoard(gameState);
+        console.log('Game reset! ' + gameState.currentPlayer.name + ' goes first');
+    });
 }
 
 
@@ -261,6 +253,12 @@ function resetBoard(gameState) {
     // Reset the game state
     gameState.isGameOver = false;
     gameState.currentPlayer = gameState.player1;
+
+     // Re-enable the input fields
+     const player1Input = document.querySelector('#p1');
+     const player2Input = document.querySelector('#p2');
+     player1Input.disabled = false;
+     player2Input.disabled = false;
 }
 
 
@@ -274,3 +272,7 @@ function createMark(currentPlayer, userRow, userCol) {
     divCell.appendChild(marker);
 
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeGame();
+});

@@ -35,7 +35,7 @@ function createPlayerNames() {
     const player2Input = document.querySelector('#p2')
 
     let player1Name = player1Input.value || 'Player 1'
-    let player2Name = player2Input.vale || 'Player 2'
+    let player2Name = player2Input.value || 'Player 2'
 
 
     return {player1Name, player2Name}
@@ -64,8 +64,6 @@ function setUpPlayers() {
 
     return {player1, player2}
 }
-
-
 
 
 // winning functions
@@ -152,120 +150,156 @@ function win(board) {
 }
 
 
+// function resetBoard(gameState) {
+//     const divCellP = document.querySelectorAll(".boardCell p")
 
-function playGame() {
-    // Get the input fields
-    const player1Input = document.querySelector('#p1');
-    const player2Input = document.querySelector('#p2');
+//     divCellP.forEach(p => p.remove());
 
-    // Basic validation
-    if (!player1Input.value || !player2Input.value) {
-        alert('Please enter names for both players!');
-        return;
-}
-
-    const {player1, player2} = setUpPlayers()
-    let currentPlayer = player1;
-
-    // Disable inputs once game starts
-    player1Input.disabled = true;
-    player2Input.disabled = true;
-
+//     // Reset the board data structure
+//     for (let i = 0; i < board.length; i++) {
+//         for (let j = 0; j < board[i].length; j++) {
+//             board[i][j].val = null;
+//         }
+//     }
     
+//     // Reset the game state
+//     gameState.isGameOver = false;
+//     gameState.currentPlayer = gameState.player1;
 
-    var gameState = {
-        currentPlayer: currentPlayer,
-        player1: player1,
-        player2: player2,
-        isGameOver: false
-    };
+//      // Re-enable the input fields
+//      const player1Input = document.querySelector('#p1');
+//      const player2Input = document.querySelector('#p2');
+//      player1Input.disabled = false;
+//      player2Input.disabled = false;
+// }
 
-    const gameboard = document.querySelectorAll('.boardCell');
-    gameboard.forEach(cell => {
-        cell.addEventListener('click', function(event) {
-            if (!gameState.isGameOver) {
-                handleCellClick(event, gameState);
+
+// Create a game state manager
+const game = {
+    state: null,
+
+    initialize() {
+        const startButton = document.querySelector('#start-button');
+        startButton.addEventListener('click', () => {
+            if (!this.state) {
+                this.start();
             }
         });
-    });
-
-
-}
-
-function initializeGame(gameState) {
-    // Set up the start button listener
-    const startButton = document.querySelector('#start-button');
-    startButton.addEventListener('click', function() {
-        // Only start if we haven't already started
-        if (!gameState) {
-            playGame();
-        }
-    });
-
-    const resetButton = document.querySelector('#reset-button');
-    resetButton.addEventListener('click', function() {
-        resetBoard(gameState);
-        console.log('Game reset! ' + gameState.currentPlayer.name + ' goes first');
-    });
-}
-
-
-function handleCellClick(event, gameState) {
-    if (gameState.isGameOver) {
-        return;
-    }
-
-    const [row, col] = event.target.id.split('_').map(Number);
-
-    if (board[row][col].val !== null) {
-        return; // Cell is already occupied
-    }
-
-    board[row][col].val = gameState.currentPlayer.XorO;
-    createMark(gameState.currentPlayer, row, col)
-    console.log(`Current player is ${gameState.currentPlayer.name}`);
-
-    if (win(board) !== null) {
-        alert(`${gameState.currentPlayer.name} wins! Game over`);
-        gameState.isGameOver = true;
-        return;
-    }
-
-    gameState.currentPlayer = 
-        gameState.currentPlayer === gameState.player1
-        ? gameState.player2
-        : gameState.player1;
-}
-
-
-function resetBoard(gameState) {
-    const divCellP = document.querySelectorAll(".boardCell p")
-
-    divCellP.forEach(p => p.remove());
-
-    // Reset the board data structure
-    for (let i = 0; i < board.length; i++) {
-        for (let j = 0; j < board[i].length; j++) {
-            board[i][j].val = null;
-        }
-    }
+        
+        const resetButton = document.querySelector('#reset-button');
+        resetButton.addEventListener('click', () => {
+            if (this.state) {
+                this.reset();
+            }
+        });
+    },
     
-    // Reset the game state
-    gameState.isGameOver = false;
-    gameState.currentPlayer = gameState.player1;
+    start() {
+        const player1Input = document.querySelector('#p1');
+        const player2Input = document.querySelector('#p2');
+        
+        if (!player1Input.value || !player2Input.value) {
+            alert('Please enter names for both players!');
+            return;
+        }
+        
+        const {player1, player2} = setUpPlayers();
+        
+        this.state = {
+            currentPlayer: player1,
+            player1: player1,
+            player2: player2,
+            isGameOver: false
+        };
+        
+        player1Input.disabled = true;
+        player2Input.disabled = true;
+        
+        this.setupBoardListeners();
+    },
 
-     // Re-enable the input fields
-     const player1Input = document.querySelector('#p1');
-     const player2Input = document.querySelector('#p2');
-     player1Input.disabled = false;
-     player2Input.disabled = false;
-}
+    handleCellClick(event) {
+        if (this.state.isGameOver) return;
+    
+        const [row, col] = event.target.id.split('_').map(Number);
+    
+        if (board[row][col].val !== null) {
+            return; // Cell is already occupied
+        }
+    
+        board[row][col].val = this.state.currentPlayer.XorO;
+        createMark(this.state.currentPlayer, row, col);
+        console.log(`Current player is ${this.state.currentPlayer.name}`);
+    
+        if (win(board) !== null) {
+            alert(`${this.state.currentPlayer.name} wins! Game over`);
+            
+            const winningPlayerNameElement = document.querySelector(
+                this.state.currentPlayer === this.state.player1 ? '#p1' : '#p2'
+            );
+            winningPlayerNameElement.classList.add('winner');
+            
+            this.state.isGameOver = true;
+            return;
+        }
+    
+        this.state.currentPlayer = 
+            this.state.currentPlayer === this.state.player1
+            ? this.state.player2
+            : this.state.player1;
+    },
+    
+    reset() {
+        // Remove winner class from both players
+        document.querySelector('#p1').classList.remove('winner');
+        document.querySelector('#p2').classList.remove('winner');
+
+        // Clear the board UI
+        const divCellP = document.querySelectorAll(".boardCell p");
+        divCellP.forEach(p => p.remove());
+
+        // Reset the board data structure
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                board[i][j].val = null;
+            }
+        }
+        
+        // Reset the game state
+        this.state.isGameOver = false;
+        this.state.currentPlayer = this.state.player1;
+
+        // Re-enable the input fields
+        const player1Input = document.querySelector('#p1');
+        const player2Input = document.querySelector('#p2');
+        player1Input.disabled = false;
+        player2Input.disabled = false;
+
+        // Reset the state itself
+        this.state = null;
+    },
+    
+    setupBoardListeners() {
+        const gameboard = document.querySelectorAll('.boardCell');
+        gameboard.forEach(cell => {
+            cell.addEventListener('click', (event) => {
+                this.handleCellClick(event);
+            });
+        });
+    }
+};
+
+// Initialize when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    game.initialize();
+});
+
 
 
 function createMark(currentPlayer, userRow, userCol) {
     // let [userRow, userCol] = cellPrompt(currentPlayer);
     const cell = `${userRow}_${userCol}`;
-    console.log(`${currentPlayer} selected a cell with id ${cell}`)
+    console.log(`${currentPlayer.name} selected a cell with id ${cell}`)
     const divCell = document.querySelector(`[id = "${cell}"]`)
     const marker = document.createElement("p");
     marker.innerText = currentPlayer.XorO;
@@ -273,6 +307,4 @@ function createMark(currentPlayer, userRow, userCol) {
 
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    initializeGame();
-});
+

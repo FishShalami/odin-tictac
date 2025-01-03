@@ -150,29 +150,6 @@ function win(board) {
 }
 
 
-// function resetBoard(gameState) {
-//     const divCellP = document.querySelectorAll(".boardCell p")
-
-//     divCellP.forEach(p => p.remove());
-
-//     // Reset the board data structure
-//     for (let i = 0; i < board.length; i++) {
-//         for (let j = 0; j < board[i].length; j++) {
-//             board[i][j].val = null;
-//         }
-//     }
-    
-//     // Reset the game state
-//     gameState.isGameOver = false;
-//     gameState.currentPlayer = gameState.player1;
-
-//      // Re-enable the input fields
-//      const player1Input = document.querySelector('#p1');
-//      const player2Input = document.querySelector('#p2');
-//      player1Input.disabled = false;
-//      player2Input.disabled = false;
-// }
-
 
 // Create a game state manager
 const game = {
